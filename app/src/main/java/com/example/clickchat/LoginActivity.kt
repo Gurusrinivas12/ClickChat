@@ -59,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
         firebaseAuthStateListener?.let { mAuth?.addAuthStateListener(it) }
     }
 
+
     override fun onStop() {
         super.onStop()
         firebaseAuthStateListener?.let { mAuth?.removeAuthStateListener(it) }

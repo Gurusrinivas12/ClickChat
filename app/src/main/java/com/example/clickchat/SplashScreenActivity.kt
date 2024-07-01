@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 class SplashScreenActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
 
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

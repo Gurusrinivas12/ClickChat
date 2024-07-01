@@ -18,6 +18,7 @@ class ChooseLoginRegistrationActivity : AppCompatActivity() {
             val intent = Intent(getApplication(), LoginActivity::class.java)
             startActivity(intent)
             return@OnClickListener
+
         })
         mRegistration.setOnClickListener(View.OnClickListener {
             val intent = Intent(getApplication(), RegistrationActivity::class.java)
