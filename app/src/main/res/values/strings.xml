@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">ClickChat</string>
+    <string name="camera_fragment">camera fragment</string>
+    <string name="chat_fragment">chat fragment</string>
+    <string name="story_fragment">Story fragment</string>
 </resources>

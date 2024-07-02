@@ -5,10 +5,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.example.clickchat.CameraFragment
-import com.example.clickchat.ChatFragment
-import com.example.clickchat.R
-import com.example.clickchat.StoryFragment
+import com.example.clickchat.fragment.CameraFragment
+import com.example.clickchat.fragment.ChatFragment
+import com.example.clickchat.fragment.StoryFragment
 
 
 class MainActivity : AppCompatActivity() {

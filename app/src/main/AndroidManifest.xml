@@ -13,7 +13,7 @@
         android:theme="@style/ClickChatTheme"
         tools:targetApi="31">
         <activity
-            android:name=".SplashScreenActivity"
+            android:name=".loginRegistration.SplashScreenActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/ClickChatTheme">
@@ -24,9 +24,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
-        <activity android:name=".ChooseLoginRegistrationActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegistrationActivity"/>
+        <activity android:name=".loginRegistration.ChooseLoginRegistrationActivity" />
+        <activity android:name=".loginRegistration.LoginActivity" />
+        <activity android:name=".loginRegistration.RegistrationActivity"/>
     </application>
 
 </manifest>
