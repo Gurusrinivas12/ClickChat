@@ -1,47 +1,44 @@
 package com.example.clickchat
-
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.clickchat.ui.theme.ClickChatTheme
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
+import com.example.clickchat.CameraFragment
+import com.example.clickchat.ChatFragment
+import com.example.clickchat.R
+import com.example.clickchat.StoryFragment
 
-class MainActivity : ComponentActivity() {
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var adapterViewPager: FragmentPagerAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ClickChatTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)
+
+        val viewPager = findViewById<ViewPager>(R.id.viewPager)
+
+        adapterViewPager = MyPagerAdapter(supportFragmentManager)
+        viewPager.adapter = adapterViewPager
+        viewPager.currentItem = 1
+    }
+
+    class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+
+        override fun getItem(position: Int): Fragment {
+            return when (position) {
+                0 -> ChatFragment.newInstance()
+                1 -> CameraFragment.newInstance()
+                2 -> StoryFragment.newInstance()
+                else -> throw IllegalStateException("Unexpected position $position")
             }
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ClickChatTheme {
-        Greeting("Android")
+        override fun getCount(): Int {
+            return 3
+        }
     }
 }
