@@ -23,29 +23,30 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        mAuth = FirebaseAuth.getInstance()
+
         firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user: FirebaseUser? = firebaseAuth.currentUser
             if (user != null) {
-                val intent = Intent(applicationContext, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
+                startActivity(Intent(applicationContext, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                })
                 finish()
             }
         }
-
-        mAuth = FirebaseAuth.getInstance()
 
         mLogin = findViewById(R.id.login)
         mEmail = findViewById(R.id.email)
         mPassword = findViewById(R.id.password)
 
         mLogin?.setOnClickListener {
-            val email = mEmail?.text.toString()
+            val email = mEmail?.text.toString().trim()
             val password = mPassword?.text.toString()
+
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 mAuth?.signInWithEmailAndPassword(email, password)?.addOnCompleteListener(this) { task ->
                     if (!task.isSuccessful) {
-                        Toast.makeText(this@LoginActivity, "Sign in ERROR", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, "Sign in failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
@@ -56,11 +57,11 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        firebaseAuthStateListener?.let { mAuth?.addAuthStateListener(it) }
+        mAuth?.addAuthStateListener(firebaseAuthStateListener!!)
     }
 
     override fun onStop() {
         super.onStop()
-        firebaseAuthStateListener?.let { mAuth?.removeAuthStateListener(it) }
+        mAuth?.removeAuthStateListener(firebaseAuthStateListener!!)
     }
 }

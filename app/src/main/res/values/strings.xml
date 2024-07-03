@@ -3,4 +3,6 @@
     <string name="camera_fragment">camera fragment</string>
     <string name="chat_fragment">chat fragment</string>
     <string name="story_fragment">Story fragment</string>
+    <string name="logout">Logout</string>
+    <string name="capture">capture</string>
 </resources>

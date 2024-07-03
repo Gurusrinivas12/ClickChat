@@ -26,17 +26,17 @@ class RegistrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registration)
 
+        mAuth = FirebaseAuth.getInstance()
+
         firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user: FirebaseUser? = firebaseAuth.currentUser
             if (user != null) {
-                val intent = Intent(applicationContext, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
+                startActivity(Intent(applicationContext, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                })
                 finish()
             }
         }
-
-        mAuth = FirebaseAuth.getInstance()
 
         mRegistration = findViewById(R.id.registration)
         mName = findViewById(R.id.name)
@@ -44,16 +44,15 @@ class RegistrationActivity : AppCompatActivity() {
         mPassword = findViewById(R.id.password)
 
         mRegistration?.setOnClickListener {
-            val name = mName?.text.toString()
-            val email = mEmail?.text.toString()
+            val name = mName?.text.toString().trim()
+            val email = mEmail?.text.toString().trim()
             val password = mPassword?.text.toString()
+
             if (name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
                 mAuth?.createUserWithEmailAndPassword(email, password)?.addOnCompleteListener(this) { task ->
-                    if (!task.isSuccessful) {
-                        Toast.makeText(applicationContext, "Sign in ERROR", Toast.LENGTH_SHORT).show()
-                    } else {
+                    if (task.isSuccessful) {
                         val userId = mAuth?.currentUser?.uid ?: ""
-                        val currentUserDb: DatabaseReference = FirebaseDatabase.getInstance().getReference().child("users").child(userId)
+                        val currentUserDb: DatabaseReference = FirebaseDatabase.getInstance().reference.child("users").child(userId)
 
                         val userInfo: MutableMap<String, Any> = HashMap()
                         userInfo["email"] = email
@@ -61,6 +60,9 @@ class RegistrationActivity : AppCompatActivity() {
                         userInfo["profileImageUrl"] = "default"
 
                         currentUserDb.updateChildren(userInfo)
+                        Toast.makeText(applicationContext, "Registration successful", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(applicationContext, "Registration failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
@@ -71,11 +73,11 @@ class RegistrationActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        firebaseAuthStateListener?.let { mAuth?.addAuthStateListener(it) }
+        mAuth?.addAuthStateListener(firebaseAuthStateListener!!)
     }
 
     override fun onStop() {
         super.onStop()
-        firebaseAuthStateListener?.let { mAuth?.removeAuthStateListener(it) }
+        mAuth?.removeAuthStateListener(firebaseAuthStateListener!!)
     }
 }

@@ -2,7 +2,7 @@ package com.example.clickchat.loginRegistration
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clickchat.R
@@ -15,16 +15,16 @@ class ChooseLoginRegistrationActivity : AppCompatActivity() {
         val mLogin: Button = findViewById(R.id.login)
         val mRegistration: Button = findViewById(R.id.registration)
 
-        mLogin.setOnClickListener(View.OnClickListener {
-            val intent = Intent(getApplication(), LoginActivity::class.java)
+        mLogin.setOnClickListener {
+            Log.d("ChooseLoginReg", "Login button clicked")
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-            return@OnClickListener
+        }
 
-        })
-        mRegistration.setOnClickListener(View.OnClickListener {
-            val intent: Intent = Intent(getApplication(), RegistrationActivity::class.java)
+        mRegistration.setOnClickListener {
+            Log.d("ChooseLoginReg", "Registration button clicked")
+            val intent = Intent(this, RegistrationActivity::class.java)
             startActivity(intent)
-            return@OnClickListener
-        })
+        }
     }
 }
