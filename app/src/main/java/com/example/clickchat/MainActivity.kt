@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager
 import com.example.clickchat.fragment.CameraFragment
 import com.example.clickchat.fragment.ChatFragment
 import com.example.clickchat.fragment.StoryFragment
+import com.google.firebase.FirebaseApp
 
 
 class MainActivity : AppCompatActivity() {
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         adapterViewPager = MyPagerAdapter(supportFragmentManager)
         viewPager.adapter = adapterViewPager
         viewPager.currentItem = 1
+        FirebaseApp.initializeApp(this)
     }
 
     class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

@@ -11,7 +11,6 @@ import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Size
 import android.view.*
 import android.widget.Button
 import android.widget.Toast
@@ -234,8 +233,10 @@ class CameraFragment : Fragment() {
             try {
                 output = FileOutputStream(file)
                 output.write(bytes)
+
+                // Instead of passing the file path, pass the byte array
                 val intent = Intent(activity, ShowCaptureActivity::class.java)
-                intent.putExtra("capture", file.absolutePath)
+                intent.putExtra("capture", bytes)
                 startActivity(intent)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -245,6 +246,7 @@ class CameraFragment : Fragment() {
             }
         }
     }
+
 
     private fun logOut() {
         FirebaseAuth.getInstance().signOut()

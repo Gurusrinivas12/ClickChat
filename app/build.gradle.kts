@@ -62,9 +62,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.core)
     implementation(libs.firebase.auth.ktx)
 
     implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.storage)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.firebase.crashlytics.buildtools)
