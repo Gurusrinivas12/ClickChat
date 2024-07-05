@@ -20,6 +20,8 @@ firebaseDatabaseKtx = "21.0.0"
 constraintlayout = "2.1.4"
 cameraLifecycle = "1.3.4"
 firebaseCrashlyticsBuildtools = "3.0.2"
+recyclerview = "1.3.2"
+material = "1.12.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -49,6 +51,8 @@ firebase-database-ktx = { group = "com.google.firebase", name = "firebase-databa
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

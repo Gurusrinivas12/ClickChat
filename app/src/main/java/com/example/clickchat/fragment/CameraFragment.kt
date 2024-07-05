@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.example.clickchat.FindUsersActivity
 import com.example.clickchat.R
 import com.example.clickchat.ShowCaptureActivity
 import com.example.clickchat.loginRegistration.SplashScreenActivity
@@ -25,6 +26,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+
 
 class CameraFragment : Fragment() {
 
@@ -82,8 +84,10 @@ class CameraFragment : Fragment() {
 
         val mLogout = view.findViewById<Button>(R.id.logout)
         val mCapture = view.findViewById<Button>(R.id.capture)
+        val mFindUsers = view.findViewById<Button>(R.id.findUsers)
         mLogout.setOnClickListener { logOut() }
         mCapture.setOnClickListener { captureImage() }
+        mFindUsers.setOnClickListener { findUsers() }
 
         return view
     }
@@ -254,6 +258,13 @@ class CameraFragment : Fragment() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
     }
+
+    private fun findUsers() {
+        val intent = Intent(context, FindUsersActivity::class.java)
+        startActivity(intent)
+        return
+    }
+
 
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

@@ -5,4 +5,8 @@
     <string name="story_fragment">Story fragment</string>
     <string name="logout">Logout</string>
     <string name="capture">capture</string>
+    <string name="follow" />
+    <string name="find_users" />
+    <string name="search" />
+    <string name="find_users_by_email" />
 </resources>

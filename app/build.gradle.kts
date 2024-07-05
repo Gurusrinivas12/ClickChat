@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -81,6 +83,3 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.camera.camera2)
 }
-
-
-
