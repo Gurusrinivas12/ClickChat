@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.clickchat.R
 
 
-class RCViewHolders(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class FollowViewHolders(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var mEmail: TextView = itemView.findViewById<TextView>(R.id.email)
     var mFollow: Button = itemView.findViewById<Button>(R.id.follow)
 }

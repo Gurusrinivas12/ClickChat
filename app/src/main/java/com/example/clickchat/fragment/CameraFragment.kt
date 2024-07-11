@@ -11,6 +11,7 @@ import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.Toast
@@ -27,14 +28,13 @@ import java.io.IOException
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
-
 class CameraFragment : Fragment() {
 
     private lateinit var cameraId: String
     private lateinit var cameraManager: CameraManager
-    private lateinit var cameraDevice: CameraDevice
+    private var cameraDevice: CameraDevice? = null
+    private var captureSession: CameraCaptureSession? = null
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
-    private lateinit var captureSession: CameraCaptureSession
     private lateinit var imageReader: ImageReader
     private lateinit var mSurfaceView: SurfaceView
     private lateinit var mSurfaceHolder: SurfaceHolder
@@ -43,6 +43,8 @@ class CameraFragment : Fragment() {
 
     private lateinit var backgroundThread: HandlerThread
     private lateinit var backgroundHandler: Handler
+
+    private val TAG = "CameraFragment"
 
     companion object {
         private const val CAMERA_REQUEST_CODE = 1
@@ -128,8 +130,10 @@ class CameraFragment : Fragment() {
     private fun closeCamera() {
         try {
             cameraOpenCloseLock.acquire()
-            captureSession.close()
-            cameraDevice.close()
+            captureSession?.close()
+            captureSession = null
+            cameraDevice?.close()
+            cameraDevice = null
             imageReader.close()
         } catch (e: InterruptedException) {
             e.printStackTrace()
@@ -148,11 +152,14 @@ class CameraFragment : Fragment() {
         override fun onDisconnected(camera: CameraDevice) {
             cameraOpenCloseLock.release()
             camera.close()
+            cameraDevice = null
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
             cameraOpenCloseLock.release()
             camera.close()
+            cameraDevice = null
+            activity?.finish()
         }
     }
 
@@ -166,7 +173,7 @@ class CameraFragment : Fragment() {
                 }, backgroundHandler)
             }
 
-            captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
+            captureRequestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
                 addTarget(surface)
             }
 
@@ -176,7 +183,7 @@ class CameraFragment : Fragment() {
                 add(imageReader.surface)
             }
 
-            cameraDevice.createCaptureSession(surfaces,
+            cameraDevice!!.createCaptureSession(surfaces,
                 object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(session: CameraCaptureSession) {
                         if (cameraDevice == null) return
@@ -187,7 +194,7 @@ class CameraFragment : Fragment() {
                                 CaptureRequest.CONTROL_AF_MODE,
                                 CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
                             )
-                            captureSession.setRepeatingRequest(
+                            captureSession!!.setRepeatingRequest(
                                 captureRequestBuilder.build(),
                                 null,
                                 backgroundHandler
@@ -210,13 +217,17 @@ class CameraFragment : Fragment() {
 
     private fun captureImage() {
         try {
-            val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
+            if (cameraDevice == null || captureSession == null) {
+                Log.e(TAG, "CameraDevice or CaptureSession is null")
+                return
+            }
+            val captureBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
                 addTarget(imageReader.surface)
                 set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
             }
 
-            captureSession.stopRepeating()
-            captureSession.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
+            captureSession!!.stopRepeating()
+            captureSession!!.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     Toast.makeText(requireContext(), "Image Captured", Toast.LENGTH_SHORT).show()
                     createCameraPreviewSession()
@@ -224,6 +235,9 @@ class CameraFragment : Fragment() {
             }, backgroundHandler)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+            Log.e(TAG, "CameraDevice was already closed")
         }
     }
 
@@ -238,7 +252,6 @@ class CameraFragment : Fragment() {
                 output = FileOutputStream(file)
                 output.write(bytes)
 
-                // Instead of passing the file path, pass the byte array
                 val intent = Intent(activity, ShowCaptureActivity::class.java)
                 intent.putExtra("capture", bytes)
                 startActivity(intent)
@@ -251,7 +264,6 @@ class CameraFragment : Fragment() {
         }
     }
 
-
     private fun logOut() {
         FirebaseAuth.getInstance().signOut()
         val intent = Intent(context, SplashScreenActivity::class.java)
@@ -262,9 +274,7 @@ class CameraFragment : Fragment() {
     private fun findUsers() {
         val intent = Intent(context, FindUsersActivity::class.java)
         startActivity(intent)
-        return
     }
-
 
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

@@ -17,11 +17,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:autofillHints="Enter email"
             android:background="@android:color/white"
             android:hint="@string/find_users"
             android:paddingStart="10sp"
+            android:paddingEnd="10sp"
             android:inputType="text"
-            android:imeOptions="actionSearch"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
