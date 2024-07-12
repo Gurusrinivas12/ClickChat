@@ -18,6 +18,9 @@
         android:theme="@style/ClickChatTheme"
         tools:targetApi="31">
         <activity
+            android:name=".DisplayImageActivity"
+            android:exported="false" />
+        <activity
             android:name=".loginRegistration.SplashScreenActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -31,9 +34,9 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".loginRegistration.ChooseLoginRegistrationActivity" />
         <activity android:name=".loginRegistration.LoginActivity" />
-        <activity android:name=".loginRegistration.RegistrationActivity"/>
-        <activity android:name=".ShowCaptureActivity"/>
-        <activity android:name=".FindUsersActivity"/>
+        <activity android:name=".loginRegistration.RegistrationActivity" />
+        <activity android:name=".ShowCaptureActivity" />
+        <activity android:name=".FindUsersActivity" />
     </application>
 
 </manifest>
