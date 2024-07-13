@@ -9,16 +9,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/surfaceView"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <Button
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/logout"
             android:id="@+id/logout"/>
+
         <Button
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -27,14 +30,13 @@
             android:id="@+id/findUsers"/>
     </LinearLayout>
 
-
-    <Button
-        android:layout_gravity="bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/capture"
-        android:id="@+id/capture"/>
-
-
-
+    <ImageButton
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/circular_button"
+        android:src="@drawable/ic_capture"
+        android:contentDescription="@string/capture"
+        android:id="@+id/capture"
+        android:layout_marginBottom="16dp"/>
 </FrameLayout>

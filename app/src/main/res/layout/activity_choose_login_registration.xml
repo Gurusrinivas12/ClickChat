@@ -4,19 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
     tools:context="com.example.clickchat.loginRegistration.ChooseLoginRegistrationActivity"
-    android:orientation="vertical">
+    android:background="#FFFC00">
 
-    <Button
-        android:layout_width="match_parent"
+
+
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"
-        android:id="@+id/login"/>
+        android:src="@drawable/ic_logo"
+        android:layout_marginBottom="8dp"/>
 
-
-    <Button
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registration"
-        android:id="@+id/registration"/>
+        android:text="ClickChat"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="194dp"
+        android:layout_height="156dp"
+        android:background="@android:drawable/dialog_holo_light_frame"
+        android:orientation="vertical"
+        android:padding="16dp"> <!-- Adding a box around the buttons -->
+
+        <Button
+            android:id="@+id/login"
+            android:layout_width="157dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Login" /> <!-- Adding margin between buttons -->
+
+        <Button
+            android:id="@+id/registration"
+            android:layout_width="159dp"
+            android:layout_height="62dp"
+            android:text="Registration" />
+
+    </LinearLayout>
 </LinearLayout>

@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.example.clickchat.fragment.CameraFragment
+import com.example.clickchat.fragment.*
 import com.example.clickchat.fragment.ChatFragment
 import com.example.clickchat.fragment.StoryFragment
 import com.google.firebase.FirebaseApp

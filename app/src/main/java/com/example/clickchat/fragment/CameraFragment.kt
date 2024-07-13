@@ -1,5 +1,3 @@
-package com.example.clickchat.fragment
-
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -17,6 +15,7 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.*
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -102,7 +101,7 @@ class CameraFragment : Fragment() {
         }
 
         val mLogout = view.findViewById<Button>(R.id.logout)
-        val mCapture = view.findViewById<Button>(R.id.capture)
+        val mCapture = view.findViewById<ImageButton>(R.id.capture)
         val mFindUsers = view.findViewById<Button>(R.id.findUsers)
         mLogout.setOnClickListener { logOut() }
         mCapture.setOnClickListener { captureImage() }
@@ -333,5 +332,3 @@ class CameraFragment : Fragment() {
         startActivity(intent)
     }
 }
-
-
