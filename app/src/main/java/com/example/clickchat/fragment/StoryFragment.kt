@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
+
 class StoryFragment : Fragment() {
 
     private lateinit var mRecyclerView: RecyclerView
@@ -71,6 +72,7 @@ class StoryFragment : Fragment() {
 
                         if (timestampCurrent in timestampBeg..timestampEnd) {
                             val storyObject = StoryObject(email, uid)
+                            val obj = StoryObject(email, uid, "story")
                             if (!results.contains(storyObject)) {
                                 results.add(storyObject)
                                 mAdapter.notifyDataSetChanged()
