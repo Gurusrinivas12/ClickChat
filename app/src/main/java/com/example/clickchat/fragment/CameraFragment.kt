@@ -4,7 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
@@ -66,8 +69,16 @@ class CameraFragment : Fragment() {
 
         cameraManager = requireActivity().getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_CODE)
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_REQUEST_CODE
+            )
         } else {
             startBackgroundThread()
             mSurfaceHolder.addCallback(object : SurfaceHolder.Callback {
@@ -75,7 +86,13 @@ class CameraFragment : Fragment() {
                     openCamera()
                 }
 
-                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) {
+                }
 
                 override fun surfaceDestroyed(holder: SurfaceHolder) {
                     closeCamera()
@@ -118,7 +135,11 @@ class CameraFragment : Fragment() {
                 characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK
             }?.let { id ->
                 cameraId = id
-                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     cameraManager.openCamera(cameraId, stateCallback, backgroundHandler)
                 }
             }
@@ -167,23 +188,29 @@ class CameraFragment : Fragment() {
         try {
             val surface = mSurfaceHolder.surface
 
-            imageReader = ImageReader.newInstance(mSurfaceView.width, mSurfaceView.height, ImageFormat.JPEG, 1).apply {
+            imageReader = ImageReader.newInstance(
+                mSurfaceView.width,
+                mSurfaceView.height,
+                ImageFormat.JPEG,
+                1
+            ).apply {
                 setOnImageAvailableListener({ reader ->
                     backgroundHandler.post(ImageSaver(reader.acquireNextImage()))
                 }, backgroundHandler)
             }
 
-            captureRequestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
-                addTarget(surface)
-            }
+            captureRequestBuilder =
+                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
+                    addTarget(surface)
+                }
 
-            // Create a list of surfaces to include both the surfaceView and the imageReader surface
             val surfaces = mutableListOf<Surface>().apply {
                 add(surface)
                 add(imageReader.surface)
             }
 
-            cameraDevice!!.createCaptureSession(surfaces,
+            cameraDevice!!.createCaptureSession(
+                surfaces,
                 object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(session: CameraCaptureSession) {
                         if (cameraDevice == null) return
@@ -221,18 +248,31 @@ class CameraFragment : Fragment() {
                 Log.e(TAG, "CameraDevice or CaptureSession is null")
                 return
             }
-            val captureBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
-                addTarget(imageReader.surface)
-                set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-            }
+            val captureBuilder =
+                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
+                    addTarget(imageReader.surface)
+                    set(
+                        CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                    )
+                }
 
             captureSession!!.stopRepeating()
-            captureSession!!.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
-                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
-                    Toast.makeText(requireContext(), "Image Captured", Toast.LENGTH_SHORT).show()
-                    createCameraPreviewSession()
-                }
-            }, backgroundHandler)
+            captureSession!!.capture(
+                captureBuilder.build(),
+                object : CameraCaptureSession.CaptureCallback() {
+                    override fun onCaptureCompleted(
+                        session: CameraCaptureSession,
+                        request: CaptureRequest,
+                        result: TotalCaptureResult
+                    ) {
+                        Toast.makeText(requireContext(), "Image Captured", Toast.LENGTH_SHORT)
+                            .show()
+                        createCameraPreviewSession()
+                    }
+                },
+                backgroundHandler
+            )
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         } catch (e: IllegalStateException) {
@@ -246,20 +286,37 @@ class CameraFragment : Fragment() {
             val buffer = image.planes[0].buffer
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
-            val file = File(requireContext().getExternalFilesDir(null), "pic.jpg")
-            var output: FileOutputStream? = null
-            try {
-                output = FileOutputStream(file)
-                output.write(bytes)
 
+            val decodedBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            val rotatedBitmap = rotate(decodedBitmap)
+            val fileLocation = saveImageToStorage(rotatedBitmap)
+
+            if (fileLocation != null) {
                 val intent = Intent(activity, ShowCaptureActivity::class.java)
-                intent.putExtra("capture", bytes)
+                intent.putExtra("imagePath", fileLocation)
                 startActivity(intent)
+            }
+
+            image.close()
+        }
+
+        private fun rotate(bitmap: Bitmap): Bitmap {
+            val matrix = Matrix()
+            matrix.postRotate(90f)
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        }
+
+        private fun saveImageToStorage(bitmap: Bitmap): String? {
+            val file = File(requireActivity().externalMediaDirs.first(), "imageToSend.jpg")
+            return try {
+                val stream = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                stream.flush()
+                stream.close()
+                file.absolutePath
             } catch (e: IOException) {
                 e.printStackTrace()
-            } finally {
-                image.close()
-                output?.close()
+                null
             }
         }
     }
@@ -275,30 +332,6 @@ class CameraFragment : Fragment() {
         val intent = Intent(context, FindUsersActivity::class.java)
         startActivity(intent)
     }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == CAMERA_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            mSurfaceHolder.addCallback(object : SurfaceHolder.Callback {
-                override fun surfaceCreated(holder: SurfaceHolder) {
-                    openCamera()
-                }
-
-                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
-
-                override fun surfaceDestroyed(holder: SurfaceHolder) {
-                    closeCamera()
-                    stopBackgroundThread()
-                }
-            })
-        } else {
-            Toast.makeText(context, "Please provide the permission", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        closeCamera()
-        stopBackgroundThread()
-    }
 }
+
+

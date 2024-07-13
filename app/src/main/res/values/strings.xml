@@ -12,4 +12,5 @@
     <string name="following">Following</string>
     <string name="refresh">refresh</string>
     <string name="desc">Content description</string>
+    <string name="save_to_story">Save to Story</string>
 </resources>
