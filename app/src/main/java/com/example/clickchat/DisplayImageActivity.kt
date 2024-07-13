@@ -1,127 +1,109 @@
 package com.example.clickchat
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.example.clickchat.R
 
 class DisplayImageActivity : AppCompatActivity() {
-    private var userId: String? = null
-    private lateinit var mImage: ImageView
-    private lateinit var progressBar: ProgressBar
-    private var imageUrlList: ArrayList<String> = ArrayList()
-    private var imageIterator = 0
-    private var started = false
-    private val handler = Handler(Looper.getMainLooper())
-    private val imageDisplayRunnable = object : Runnable {
-        override fun run() {
-            changeImage()
-            handler.postDelayed(this, IMAGE_DISPLAY_DURATION)
-        }
-    }
 
-    companion object {
-        private const val IMAGE_DISPLAY_DURATION = 5000L // 5 seconds
-    }
+    private var userId: String? = null
+    private var currentUid: String? = null
+    private var chatOrStory: String? = null
+
+    private lateinit var mImage: ImageView
+    private val imageUrlList = ArrayList<String>()
+    private var started = false
+    private var imageIterator = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_image)
 
-        userId = intent.extras?.getString("userId")
-        if (userId == null) {
-            finish()
-            return
-        }
+        currentUid = FirebaseAuth.getInstance().uid
+
+        val b = intent.extras
+        userId = b?.getString("userId")
+        chatOrStory = b?.getString("chatOrStory")
 
         mImage = findViewById(R.id.image)
-        progressBar = findViewById(R.id.progress_bar)
 
-        listenForData()
+        when (chatOrStory) {
+            "chat" -> listenForChat()
+            "story" -> listenForStory()
+        }
     }
 
-    private fun listenForData() {
-        val followingStoryDb = FirebaseDatabase.getInstance().reference.child("users").child(userId!!)
+    private fun listenForChat() {
+        val chatDb = FirebaseDatabase.getInstance().getReference("users").child(currentUid!!).child("received").child(userId!!)
+        chatDb.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (chatSnapshot in dataSnapshot.children) {
+                    val imageUrl = chatSnapshot.child("imageUrl").getValue(String::class.java)
+                    imageUrl?.let {
+                        imageUrlList.add(it)
+                        if (!started) {
+                            started = true
+                            initializeDisplay()
+                        }
+                        chatDb.child(chatSnapshot.key!!).removeValue()
+                    }
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
+
+    private fun listenForStory() {
+        val followingStoryDb = FirebaseDatabase.getInstance().getReference("users").child(userId!!)
         followingStoryDb.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (storySnapshot in dataSnapshot.child("story").children) {
-                    val timestampBeg = storySnapshot.child("timestampBeg").value?.toString()?.toLong() ?: continue
-                    val timestampEnd = storySnapshot.child("timestampEnd").value?.toString()?.toLong() ?: continue
-                    val imageUrl = storySnapshot.child("imageUrl").value?.toString() ?: continue
-
+                    val timestampBeg = storySnapshot.child("timestampBeg").getValue(Long::class.java) ?: 0L
+                    val timestampEnd = storySnapshot.child("timestampEnd").getValue(Long::class.java) ?: 0L
+                    val imageUrl = storySnapshot.child("imageUrl").getValue(String::class.java)
                     val timestampCurrent = System.currentTimeMillis()
                     if (timestampCurrent in timestampBeg..timestampEnd) {
-                        imageUrlList.add(imageUrl)
+                        imageUrl?.let {
+                            imageUrlList.add(it)
+                            if (!started) {
+                                started = true
+                                initializeDisplay()
+                            }
+                        }
                     }
-                }
-                if (!started && imageUrlList.isNotEmpty()) {
-                    started = true
-                    initializeDisplay()
                 }
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Handle database error
-            }
+            override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
     private fun initializeDisplay() {
-        displayImage()
+        Glide.with(applicationContext).load(imageUrlList[imageIterator]).into(mImage)
         mImage.setOnClickListener { changeImage() }
-        handler.postDelayed(imageDisplayRunnable, IMAGE_DISPLAY_DURATION)
-    }
-
-    private fun displayImage() {
-        if (imageUrlList.isNotEmpty()) {
-            progressBar.visibility = View.VISIBLE
-            Glide.with(this)
-                .load(imageUrlList[imageIterator])
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        progressBar.visibility = View.GONE
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: com.bumptech.glide.load.DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        progressBar.visibility = View.GONE
-                        return false
-                    }
-                })
-                .into(mImage)
-        }
+        val handler = Handler()
+        val delay = 5000
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                changeImage()
+                handler.postDelayed(this, delay.toLong())
+            }
+        }, delay.toLong())
     }
 
     private fun changeImage() {
-        imageIterator = (imageIterator + 1) % imageUrlList.size
-        displayImage()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacks(imageDisplayRunnable)
+        if (imageIterator == imageUrlList.size - 1) {
+            finish()
+            return
+        }
+        imageIterator++
+        Glide.with(applicationContext).load(imageUrlList[imageIterator]).into(mImage)
     }
 }

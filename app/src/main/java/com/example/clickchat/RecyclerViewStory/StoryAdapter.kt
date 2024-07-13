@@ -21,6 +21,7 @@ class StoryAdapter(
     override fun onBindViewHolder(holder: StoryViewHolders, position: Int) {
         holder.mEmail.text = usersList[position].email
         holder.mEmail.tag = usersList[position].uid
+        holder.mLayout.tag = usersList[position].charOrStory
     }
 
     override fun getItemCount(): Int {
