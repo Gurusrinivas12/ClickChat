@@ -1,11 +1,13 @@
 package com.example.clickchat
-
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.example.clickchat.R
@@ -20,6 +22,13 @@ class DisplayImageActivity : AppCompatActivity() {
     private val imageUrlList = ArrayList<String>()
     private var started = false
     private var imageIterator = 0
+    private val handler = Handler(Looper.getMainLooper())
+    private val changeImageRunnable = object : Runnable {
+        override fun run() {
+            changeImage()
+            handler.postDelayed(this, 5000)  // Schedule the next image change in 5 seconds
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,12 +40,19 @@ class DisplayImageActivity : AppCompatActivity() {
         userId = b?.getString("userId")
         chatOrStory = b?.getString("chatOrStory")
 
+        Log.d("DisplayImageActivity", "Received userId: $userId, chatOrStory: $chatOrStory")
+
         mImage = findViewById(R.id.image)
 
         when (chatOrStory) {
             "chat" -> listenForChat()
             "story" -> listenForStory()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(changeImageRunnable)  // Stop the handler when the activity is destroyed
     }
 
     private fun listenForChat() {
@@ -46,6 +62,7 @@ class DisplayImageActivity : AppCompatActivity() {
                 for (chatSnapshot in dataSnapshot.children) {
                     val imageUrl = chatSnapshot.child("imageUrl").getValue(String::class.java)
                     imageUrl?.let {
+                        Log.d("DisplayImageActivity", "Fetched chat image URL: $it")
                         imageUrlList.add(it)
                         if (!started) {
                             started = true
@@ -56,7 +73,9 @@ class DisplayImageActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("DisplayImageActivity", "Error fetching chat images: ${databaseError.message}")
+            }
         })
     }
 
@@ -71,6 +90,7 @@ class DisplayImageActivity : AppCompatActivity() {
                     val timestampCurrent = System.currentTimeMillis()
                     if (timestampCurrent in timestampBeg..timestampEnd) {
                         imageUrl?.let {
+                            Log.d("DisplayImageActivity", "Fetched story image URL: $it")
                             imageUrlList.add(it)
                             if (!started) {
                                 started = true
@@ -81,29 +101,37 @@ class DisplayImageActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("DisplayImageActivity", "Error fetching stories: ${databaseError.message}")
+            }
         })
     }
 
     private fun initializeDisplay() {
-        Glide.with(applicationContext).load(imageUrlList[imageIterator]).into(mImage)
-        mImage.setOnClickListener { changeImage() }
-        val handler = Handler()
-        val delay = 5000
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                changeImage()
-                handler.postDelayed(this, delay.toLong())
-            }
-        }, delay.toLong())
+        if (imageUrlList.isNotEmpty()) {
+            mImage.visibility = View.VISIBLE
+            loadImage(imageUrlList[imageIterator])
+            mImage.setOnClickListener { changeImage() }
+            handler.postDelayed(changeImageRunnable, 5000)  // Start the handler to change the image every 5 seconds
+        } else {
+            Log.e("DisplayImageActivity", "Image URL list is empty.")
+        }
     }
 
     private fun changeImage() {
-        if (imageIterator == imageUrlList.size - 1) {
-            finish()
-            return
-        }
         imageIterator++
-        Glide.with(applicationContext).load(imageUrlList[imageIterator]).into(mImage)
+        if (imageIterator < imageUrlList.size) {
+            loadImage(imageUrlList[imageIterator])
+        } else {
+            finish()
+        }
     }
+    private fun loadImage(url: String) {
+        Log.d("DisplayImageActivity", "Loading image URL: $url")
+        Glide.with(this)
+            .load(url)
+            .into(mImage)
+    }
+
+
 }

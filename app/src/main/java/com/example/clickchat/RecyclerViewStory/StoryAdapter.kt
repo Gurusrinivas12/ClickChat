@@ -13,8 +13,7 @@ class StoryAdapter(
 ) : RecyclerView.Adapter<StoryViewHolders>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryViewHolders {
-        val layoutView: View =
-            LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_story_item, parent, false)
+        val layoutView: View = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_story_item, parent, false)
         return StoryViewHolders(layoutView)
     }
 

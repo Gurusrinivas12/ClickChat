@@ -63,6 +63,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:id="@+id/register"/>
+            android:id="@+id/registration"/>
     </LinearLayout>
 </LinearLayout>

@@ -1,6 +1,8 @@
 package com.example.clickchat.RecyclerViewStory
+
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -19,8 +21,16 @@ class StoryViewHolders(itemView: View) : RecyclerView.ViewHolder(itemView), View
     override fun onClick(view: View) {
         val intent = Intent(view.context, DisplayImageActivity::class.java)
         val b = Bundle()
-        b.putString("userId", mEmail.tag.toString())
-        b.putString("chatOrStory", mLayout.tag.toString())
+
+        // Check if mEmail.tag and mLayout.tag are null and handle appropriately
+        val userId = mEmail.tag?.toString() ?: ""
+        val chatOrStory = mLayout.tag?.toString() ?: ""
+
+        Log.d("StoryViewHolders", "UserId: $userId, ChatOrStory: $chatOrStory")
+
+        b.putString("userId", userId)
+        b.putString("chatOrStory", chatOrStory)
+
         intent.putExtras(b)
         view.context.startActivity(intent)
     }

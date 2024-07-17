@@ -110,6 +110,12 @@ class CameraFragment : Fragment() {
         return view
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        closeCamera()
+        stopBackgroundThread()
+    }
+
     private fun startBackgroundThread() {
         backgroundThread = HandlerThread("CameraBackground").also { it.start() }
         backgroundHandler = Handler(backgroundThread.looper)
@@ -154,7 +160,9 @@ class CameraFragment : Fragment() {
             captureSession = null
             cameraDevice?.close()
             cameraDevice = null
-            imageReader.close()
+            if (::imageReader.isInitialized) {
+                imageReader.close()
+            }
         } catch (e: InterruptedException) {
             e.printStackTrace()
         } finally {
@@ -164,18 +172,21 @@ class CameraFragment : Fragment() {
 
     private val stateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
+            Log.d(TAG, "Camera opened")
             cameraOpenCloseLock.release()
             cameraDevice = camera
             createCameraPreviewSession()
         }
 
         override fun onDisconnected(camera: CameraDevice) {
+            Log.d(TAG, "Camera disconnected")
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
+            Log.e(TAG, "Camera error: $error")
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
@@ -225,6 +236,7 @@ class CameraFragment : Fragment() {
                                 null,
                                 backgroundHandler
                             )
+                            Log.d(TAG, "Camera preview session created")
                         } catch (e: CameraAccessException) {
                             e.printStackTrace()
                         }

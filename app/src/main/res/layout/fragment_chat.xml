@@ -3,26 +3,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="#FFFC00"
     android:orientation="vertical">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="chat fragment"
+        android:layout_height="40dp"
+        android:text="@string/chats"
         android:gravity="center"
-        android:textColor="@android:color/white" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="refresh"
-        android:id="@+id/refresh" />
+        android:textColor="@android:color/black"
+        android:textSize="24sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/refresh"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="refresh" />
 
 </LinearLayout>
